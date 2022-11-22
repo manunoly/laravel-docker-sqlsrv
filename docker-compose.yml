@@ -3,7 +3,7 @@ version: '3'
 services:
     laravel.test:
         build:
-            context: ./vendor/laravel/sail/runtimes/8.1
+            context: ./docker/8.1
             dockerfile: Dockerfile
             args:
                 WWWGROUP: '${WWWGROUP}'
@@ -24,8 +24,9 @@ services:
             - sail
         depends_on:
             - mysql
-            - pgsql
-            - mariadb
+            # - pgsql
+            # - mariadb
+            - mssql
             - redis
             - memcached
             - meilisearch
@@ -52,44 +53,63 @@ services:
             test: ["CMD", "mysqladmin", "ping", "-p${DB_PASSWORD}"]
             retries: 3
             timeout: 5s
-    pgsql:
-        image: 'postgres:14'
+    mssql:
+        image: 'mcr.microsoft.com/mssql/server:2022-latest'
         ports:
-            - '${FORWARD_DB_PORT:-5432}:5432'
+            - '${FORWARD_DB_PORT:-1433}:1433'
         environment:
-            PGPASSWORD: '${DB_PASSWORD:-secret}'
-            POSTGRES_DB: '${DB_DATABASE}'
-            POSTGRES_USER: '${DB_USERNAME}'
-            POSTGRES_PASSWORD: '${DB_PASSWORD:-secret}'
+            ACCEPT_EULA: "Y"
+            MSSQL_PID: "Developer"
+            MSSQL_SA_PASSWORD: ${MS_PASSWORD}
+            MSSQL_DATABASE: ${MS_DATABASE}
+            MSSQL_USER: ${MS_USERNAME}
+            MSSQL_PASSWORD: ${MS_PASSWORD}
         volumes:
-            - 'sail-pgsql:/var/lib/postgresql/data'
-            - './vendor/laravel/sail/database/pgsql/create-testing-database.sql:/docker-entrypoint-initdb.d/10-create-testing-database.sql'
+            - 'sail-mssql:/var/opt/mssql'
         networks:
             - sail
         healthcheck:
-            test: ["CMD", "pg_isready", "-q", "-d", "${DB_DATABASE}", "-U", "${DB_USERNAME}"]
+            test: ["CMD", "sqlcmd", "-S", "localhost", "-U", "sa", "-P", "${MS_PASSWORD}", "-Q", "SELECT 1"]
             retries: 3
             timeout: 5s
-    mariadb:
-        image: 'mariadb:10'
-        ports:
-            - '${FORWARD_DB_PORT:-3306}:3306'
-        environment:
-            MYSQL_ROOT_PASSWORD: '${DB_PASSWORD}'
-            MYSQL_ROOT_HOST: "%"
-            MYSQL_DATABASE: '${DB_DATABASE}'
-            MYSQL_USER: '${DB_USERNAME}'
-            MYSQL_PASSWORD: '${DB_PASSWORD}'
-            MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
-        volumes:
-            - 'sail-mariadb:/var/lib/mysql'
-            - './vendor/laravel/sail/database/mysql/create-testing-database.sh:/docker-entrypoint-initdb.d/10-create-testing-database.sh'
-        networks:
-            - sail
-        healthcheck:
-            test: ["CMD", "mysqladmin", "ping", "-p${DB_PASSWORD}"]
-            retries: 3
-            timeout: 5s
+    # pgsql:
+    #     image: 'postgres:14'
+    #     ports:
+    #         - '${FORWARD_DB_PORT:-5432}:5432'
+    #     environment:
+    #         PGPASSWORD: '${DB_PASSWORD:-secret}'
+    #         POSTGRES_DB: '${DB_DATABASE}'
+    #         POSTGRES_USER: '${DB_USERNAME}'
+    #         POSTGRES_PASSWORD: '${DB_PASSWORD:-secret}'
+    #     volumes:
+    #         - 'sail-pgsql:/var/lib/postgresql/data'
+    #         - './vendor/laravel/sail/database/pgsql/create-testing-database.sql:/docker-entrypoint-initdb.d/10-create-testing-database.sql'
+    #     networks:
+    #         - sail
+    #     healthcheck:
+    #         test: ["CMD", "pg_isready", "-q", "-d", "${DB_DATABASE}", "-U", "${DB_USERNAME}"]
+    #         retries: 3
+    #         timeout: 5s
+    # mariadb:
+    #     image: 'mariadb:10'
+    #     ports:
+    #         - '${FORWARD_DB_PORT:-3306}:3306'
+    #     environment:
+    #         MYSQL_ROOT_PASSWORD: '${DB_PASSWORD}'
+    #         MYSQL_ROOT_HOST: "%"
+    #         MYSQL_DATABASE: '${DB_DATABASE}'
+    #         MYSQL_USER: '${DB_USERNAME}'
+    #         MYSQL_PASSWORD: '${DB_PASSWORD}'
+    #         MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
+    #     volumes:
+    #         - 'sail-mariadb:/var/lib/mysql'
+    #         - './vendor/laravel/sail/database/mysql/create-testing-database.sh:/docker-entrypoint-initdb.d/10-create-testing-database.sh'
+    #     networks:
+    #         - sail
+    #     healthcheck:
+    #         test: ["CMD", "mysqladmin", "ping", "-p${DB_PASSWORD}"]
+    #         retries: 3
+    #         timeout: 5s
     redis:
         image: 'redis:alpine'
         ports:
@@ -158,13 +178,15 @@ networks:
 volumes:
     sail-mysql:
         driver: local
-    sail-pgsql:
-        driver: local
-    sail-mariadb:
-        driver: local
+    # sail-pgsql:
+    #     driver: local
+    # sail-mariadb:
+    #     driver: local
     sail-redis:
         driver: local
     sail-meilisearch:
         driver: local
     sail-minio:
+        driver: local
+    sail-mssql:
         driver: local
