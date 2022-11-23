@@ -63,8 +63,6 @@ RUN echo "Installing Microsoft Drivers for PHP for SQL Server" \
 
 RUN apt install nano
 
-RUN echo "memory_limit=-1" > /etc/php/8.1/cli/conf.d/99-memory-limit.ini
-
 RUN setcap "cap_net_bind_service=+ep" /usr/bin/php8.1
 
 RUN groupadd --force -g $WWWGROUP sail
