@@ -1,6 +1,7 @@
 FROM ubuntu:22.04
 
 LABEL maintainer="Taylor Otwell"
+LABEL modifiedBy="manunoly=>Manuel Almaguer"
 
 ARG WWWGROUP
 ARG NODE_VERSION=16

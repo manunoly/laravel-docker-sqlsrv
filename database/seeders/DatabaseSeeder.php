@@ -22,5 +22,17 @@ class DatabaseSeeder extends Seeder
             'password' => bcrypt('manuel123'),
 
         ]);
+        \App\Models\User::factory()->create([
+            'name' => 'Elias Jo',
+            'email' => 'elias@entourageyearbooks.com',
+            'password' => bcrypt('elias123'),
+
+        ]);
+        \App\Models\User::factory()->create([
+            'name' => 'Nicole Rossi',
+            'email' => 'nicole.rossi@entourageyearbooks.com',
+            'password' => bcrypt('nicole123'),
+
+        ]);
     }
 }
