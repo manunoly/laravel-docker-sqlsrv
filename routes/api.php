@@ -27,7 +27,7 @@ Route::get('/', function () {
 
 Route::get('/mssql', function () {
     //get users from sqlsrv using eloquent
-    $users = User::on('sqlsrv')->limit(11)->get();
+    $users = User::on('sqlsrv')->limit(50)->get();
     return $users;
 });
 
@@ -80,6 +80,6 @@ Route::get('/users/bulk-insert/{cxn?}', function ($cnx = 'mysql') {
 
 
 Route::get('/users/{cxn?}', function ($cnx = 'mysql') {
-    $users = User::on($cnx)->limit(11)->orderBy('id', 'desc')->get();
+    $users = User::on($cnx)->limit(50)->get();
     return $users;
 });
