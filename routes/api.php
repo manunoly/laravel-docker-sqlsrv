@@ -21,7 +21,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::get('/hello', function () {
+Route::get('/', function () {
     return 'Hello World';
 });
 
@@ -80,6 +80,6 @@ Route::get('/users/bulk-insert/{cxn?}', function ($cnx = 'mysql') {
 
 
 Route::get('/users/{cxn?}', function ($cnx = 'mysql') {
-    $users = User::on($cnx)->limit(11)->get();
+    $users = User::on($cnx)->limit(11)->orderBy('id', 'desc')->get();
     return $users;
 });
